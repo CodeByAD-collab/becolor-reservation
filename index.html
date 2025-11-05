@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -427,8 +428,8 @@
                 // Add services for selected category
                 services[category].forEach(service => {
                     const option = document.createElement('option');
-                    option.value = ${service.name} - ${service.price};
-                    option.textContent = ${service.name} - ${service.price};
+                    option.value = `${service.name} - ${service.price}`;
+                    option.textContent = `${service.name} - ${service.price}`;
                     serviceSelect.appendChild(option);
                 });
                 
@@ -455,15 +456,15 @@
             };
 
             // Create WhatsApp message
-            const message = 🌟 *Nouvelle Réservation - BeColor*\n\n +
-                          👤 *Nom:* ${formData.name}\n +
-                          📞 *Téléphone:* ${formData.phone}\n +
-                          💇 *Catégorie:* ${formData.category}\n +
-                          ✨ *Service:* ${formData.service}\n +
-                          📅 *Date:* ${formData.date}\n +
-                          ⏰ *Heure:* ${formData.time};
+            const message = `🌟 *Nouvelle Réservation - BeColor*\n\n` +
+                          `👤 *Nom:* ${formData.name}\n` +
+                          `📞 *Téléphone:* ${formData.phone}\n` +
+                          `💇 *Catégorie:* ${formData.category}\n` +
+                          `✨ *Service:* ${formData.service}\n` +
+                          `📅 *Date:* ${formData.date}\n` +
+                          `⏰ *Heure:* ${formData.time}`;
 
-            const whatsappUrl = https://wa.me/212668545844?text=${encodeURIComponent(message)};
+            const whatsappUrl = `https://wa.me/212668545844?text=${encodeURIComponent(message)}`;
             
             // Open WhatsApp
             window.open(whatsappUrl, '_blank');
