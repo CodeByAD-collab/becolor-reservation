@@ -417,75 +417,91 @@
 
         // Handle category selection
         document.getElementById('serviceCategory').addEventListener('change', function() {
-            const category = this.value;
-            const serviceSelect = document.getElementById('service');
-            const specificServiceDiv = document.getElementById('specificService');
-            
-            if (category && services[category]) {
-                // Clear previous options
-                serviceSelect.innerHTML = '<option value="">Sélectionnez le service exact</option>';
-                
-                // Add services for selected category
-                services[category].forEach(service => {
-                    const option = document.createElement('option');
-                    option.value = `${service.name} - ${service.price}`;
-                    option.textContent = `${service.name} - ${service.price}`;
-                    serviceSelect.appendChild(option);
-                });
-                
-                // Show specific service dropdown
-                specificServiceDiv.style.display = 'block';
-                serviceSelect.required = true;
-            } else {
-                specificServiceDiv.style.display = 'none';
-                serviceSelect.required = false;
+        const category = this.value;
+        const serviceSelect = document.getElementById('service');
+        const specificServiceDiv = document.getElementById('specificService');
+        
+        if (category && services[category]) {
+            serviceSelect.innerHTML = '<option value="">Sélectionnez le service exact</option>';
+            services[category].forEach(service => {
+                const option = document.createElement('option');
+                option.value = `${service.name} - ${service.price}`;
+                option.textContent = `${service.name} - ${service.price}`;
+                serviceSelect.appendChild(option);
+            });
+            specificServiceDiv.style.display = 'block';
+            serviceSelect.required = true;
+        } else {
+            specificServiceDiv.style.display = 'none';
+            serviceSelect.required = false;
+        }
+    });
+
+    // --- NOUVELLE LOGIQUE POUR L'ENVOI DU FORMULAIRE ---
+    document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+        
+        // 1. Récupérer et formater les données pour le backend
+        const nomClient = document.getElementById('name').value;
+        const telephone = document.getElementById('phone').value;
+        const categorie = document.getElementById('serviceCategory').value;
+        const service = document.getElementById('service').value;
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+
+        // On combine la date et l'heure au format que le backend attend
+        const dateHeure = `${date} ${time}:00`;
+
+        const reservationData = {
+            nomClient,
+            telephone,
+            categorie,
+            service,
+            dateHeure
+        };
+
+        // 2. Envoyer les données au backend
+        try {
+            const response = await fetch('http://localhost:3001/api/reservations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reservationData),
+            });
+
+            if (!response.ok) {
+                // Si le serveur renvoie une erreur (ex: 400, 500)
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Une erreur est survenue.');
             }
-        });
 
-        // Form submission handler
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                category: document.getElementById('serviceCategory').options[document.getElementById('serviceCategory').selectedIndex].text,
-                service: document.getElementById('service').value,
-                date: document.getElementById('date').value,
-                time: document.getElementById('time').value
-            };
+            const result = await response.json();
+            console.log('Succès:', result);
 
-            // Create WhatsApp message
-            const message = `🌟 *Nouvelle Réservation - BeColor*\n\n` +
-                          `👤 *Nom:* ${formData.name}\n` +
-                          `📞 *Téléphone:* ${formData.phone}\n` +
-                          `💇 *Catégorie:* ${formData.category}\n` +
-                          `✨ *Service:* ${formData.service}\n` +
-                          `📅 *Date:* ${formData.date}\n` +
-                          `⏰ *Heure:* ${formData.time}`;
-
-            const whatsappUrl = `https://wa.me/212668545844?text=${encodeURIComponent(message)}`;
+            // Afficher un message de succès à l'utilisateur
+            alert('Votre demande de réservation a bien été enregistrée ! Nous vous contacterons bientôt pour confirmer.');
             
-            // Open WhatsApp
-            window.open(whatsappUrl, '_blank');
-            
-            // Show success message
-            alert('Merci! Vous allez être redirigé vers WhatsApp pour confirmer votre réservation.');
-            
-            // Reset form
+            // Réinitialiser le formulaire
             this.reset();
             document.getElementById('specificService').style.display = 'none';
-        });
 
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').setAttribute('min', today);
+        } catch (error) {
+            console.error('Erreur lors de la soumission:', error);
+            // Afficher un message d'erreur
+            alert(`Erreur lors de la réservation : ${error.message}`);
+        }
+    });
 
-        // Smooth scroll for reservation button
-        document.querySelector('.reserve-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
-        });
-    </script>
+    // Le reste du script ne change pas
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').setAttribute('min', today);
+
+    document.querySelector('.reserve-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
 </body>
 </html>
+
